@@ -1,0 +1,5 @@
+docker rm -f rick
+#docker run --privileged=true -it --name rick --net=host -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro mesos_base
+
+docker run --privileged=true -it --name rick --net=host -d -v $(pwd)/start.sh:/start.sh mesos_base
+docker exec -it rick /bin/bash

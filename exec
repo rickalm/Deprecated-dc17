@@ -1,0 +1,1 @@
+eval $(grep "^docker exec" run)
