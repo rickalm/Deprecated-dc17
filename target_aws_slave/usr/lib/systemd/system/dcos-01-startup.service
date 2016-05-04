@@ -1,0 +1,10 @@
+[Unit]
+Description=Creates DCOS environment in Docker Container
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/start.sh
+
+[Install]
+WantedBy=default.target

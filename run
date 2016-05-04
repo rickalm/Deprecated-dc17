@@ -1,5 +1,13 @@
 docker rm -f rick
-#docker run --privileged=true -it --name rick --net=host -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro mesos_base
+#docker run --privileged=true -it --name rick --net=host -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro uptake/dcos:1.7_aws_master
+#docker run --privileged=true -it --name rick --net=host -d -v $(pwd)/start.sh:/start.sh uptake/dcos:1.7_aws_master
 
-docker run --privileged=true -it --name rick --net=host -d -v $(pwd)/start.sh:/start.sh mesos_base
+docker run --privileged=true -it --name rick --net=host -d \
+  -e 'AAWS_REGION=us-west-2' \
+  -e 'AAWS_S3_BUCKET=d17-exhibitorbucket-16kxi4haxfe6l' \
+  -e 'MESOS_CLUSTER=RICKTEST' \
+  uptake/dcos:1.7_aws_master
+
+docker exec -it rick watch -n 0.2 --diff 'systemctl -a | grep dcos | cut -b1-120 | sort -k3,3 -k1,1'
 docker exec -it rick /bin/bash
+

@@ -1,0 +1,40 @@
+FROM uptake/centos:7-systemd
+
+# Begin DCOS 1.7 Installation
+#
+#
+ENV BOOTSTRAP_URL=https://downloads.mesosphere.com/dcos/EarlyAccess
+ENV BOOTSTRAP_ID=a31ed4c418a9d0d55d5304171e1ac2fce4ddc797
+
+VOLUME [ "/var/lib/mesos", "/var/log/mesos" ]
+
+# Install DCOS 1.7 bootstrap package
+# create group "nogroup" for nginx
+# Fix issue with os.rename not working in docker container
+# Configure system files and bootstrap setup-flags files
+#
+RUN \
+  mkdir -p /opt/mesosphere; \
+  /usr/bin/curl -LSq -o - ${BOOTSTRAP_URL}/bootstrap/${BOOTSTRAP_ID}.bootstrap.tar.xz | tar -C /opt/mesosphere -Jxf -; \
+  \
+  groupadd nogroup; \
+  \
+  sed -i -e 's/os.rename(active, old_path)/os.system("mv "+active+" "+old_path)/' \
+    /opt/mesosphere/lib/python3.4/site-packages/pkgpanda/__init__.py; \
+  \
+  sed -i -e 's/os.rename(active, old_path)/os.system("mv "+active+" "+old_path)/' \
+    /opt/mesosphere/packages/dcos-image--75d4ba1419141c3d791b9eaa90f4483503b17777/lib/python3.4/site-packages/pkgpanda/__init__.py; \
+  \
+  mkdir -p /etc/profile.d; \
+  mkdir -p /etc/systemd/journald.conf.d; \
+  mkdir -p /etc/mesosphere/roles; \
+  mkdir -p /etc/mesosphere/setup-flags; \
+  \
+  echo '[Journal]' >>/etc/systemd/journald.conf.d/dcos.conf; \
+  echo 'MaxLevelConsole=warning' >>/etc/systemd/journald.conf.d/dcos.conf; \
+  \
+  /usr/bin/ln -sf /opt/mesosphere/environment.export /etc/profile.d/dcos.sh; \
+  \
+  echo BOOTSTRAP_ID=${BOOTSTRAP_ID} >/etc/mesosphere/setup-flags/bootstrap-id; \
+  echo ${BOOTSTRAP_URL} >/etc/mesosphere/setup-flags/repository-url
+

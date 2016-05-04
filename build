@@ -1,1 +1,8 @@
-docker build -t mesos_base .
+docker ps | grep uptake.dcos | awk '{print $1}' | xargs -n 1 docker rm -f
+docker ps | grep uptake.centos | awk '{print $1}' | xargs -n 1 docker rm -f
+
+docker build -f Dockerfile.centos:7-systemd -t uptake/centos:7-systemd .
+docker build -f Dockerfile.dcos:1.7_base_master -t uptake/dcos:1.7_base_master .
+docker build -f Dockerfile.dcos:1.7_aws_master -t uptake/dcos:1.7_aws_master .
+docker build -f Dockerfile.dcos:1.7_base_slave -t uptake/dcos:1.7_base_slave .
+docker build -f Dockerfile.dcos:1.7_aws_slave -t uptake/dcos:1.7_aws_slave .

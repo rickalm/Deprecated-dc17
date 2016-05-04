@@ -1,1 +1,1 @@
-eval $(grep "^docker exec" run)
+eval $(grep "^docker exec" run | tail -1)

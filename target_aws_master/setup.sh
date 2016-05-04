@@ -1,18 +1,25 @@
+#! /bin/bash
 
-/opt/mesosphere/bin/pkgpanda setup --no-systemd
+find_file() {
+  find /opt/mesosphere/packages -name $1
+}
+
+get_pkg_id() {
+  basename $(find /opt/mesosphere/packages -maxdepth 1 -name $1*)
+}
 
 add_to_unit() {
-  grep -qi "^$2" /etc/systemd/system/$1 || sed -i -e "/\\[Unit\\]/a$2=" /etc/systemd/system/$1
-  sed -i -e "/^$2/I s~\$~ $3~" /etc/systemd/system/$1
-  sed -i -e 's/= /=/' /etc/systemd/system/$1
+  grep -qi "^$2" $(find_file $1) || sed -i -e "/\\[Unit\\]/a$2=" $(find_file $1)
+  sed -i -e "/^$2/I s~\$~ $3~" $(find_file $1)
+  sed -i -e 's~= ~=~' $(find_file $1)
 }
 
 append_to_unit() {
-  sed -i -e "/\\[Unit\\]/a$2=$3" /etc/systemd/system/$1
+  sed -i -e "/\\[Unit\\]/a$2=$3" $(find_file $1)
 }
 
 svc_sed() {
-  sed -i -e "s/$2/$3/" /etc/systemd/system/$1
+  sed -i -e "s~$2~$3~" $(find_file $1)
 }
 
 svc_needs() {
@@ -28,16 +35,16 @@ svc_starts() {
 svc_add_prestart() {
   local name=$1; shift
   echo /\\[Service\\]/aExecStartPre=$@ >/tmp/$$.sed
-  sed -i -f /tmp/$$.sed /etc/systemd/system/$name
+  sed -i -f /tmp/$$.sed $(find_file $name)
   rm /tmp/$$.sed
 }
 
 svc_append() {
-  echo $2 >>/etc/systemd/system/$1
+  echo $2 >>$(find_file $1)
 }
 
 svc_rm_dep() {
-  sed -i -e "/$2/d" /etc/systemd/system/$1
+  sed -i -e "/$2/d" $(find_file $1)
 }
 
 svc_cond_pathexists() {
@@ -86,34 +93,25 @@ svc_needs_file() {
   svc_add_prestart $1	/usr/bin/test -f $2
 }
 
-touch /opt/mesosphere/bin/wait_till_ping.sh
-chmod +x /opt/mesosphere/bin/wait_till_ping.sh
-cat <<EOF >>/opt/mesosphere/bin/wait_till_ping.sh
+dcos_config_dir=$(find /opt/mesosphere/packages -name dcos-config--setup*)
+
+touch ${dcos_config_dir}/bin/wait_till_ping.sh
+chmod +x ${dcos_config_dir}/bin/wait_till_ping.sh
+cat <<EOF >>${dcos_config_dir}/bin/wait_till_ping.sh
 #! /bin/sh
 until ping -c 1 \$1 || /bin/false; do
   sleep 1
 done
 EOF
 
-touch /opt/mesosphere/bin/wait_for_zookeeper.sh
-chmod +x /opt/mesosphere/bin/wait_for_zookeeper.sh
-cat <<EOF >>/opt/mesosphere/bin/wait_for_zookeeper.sh
+touch ${dcos_config_dir}/bin/wait_for_zookeeper.sh
+chmod +x ${dcos_config_dir}/bin/wait_for_zookeeper.sh
+cat <<EOF >>${dcos_config_dir}/bin/wait_for_zookeeper.sh
 #! /bin/sh
 until /opt/mesosphere/bin/exhibitor_wait.py; do
   sleep 1
 done
 EOF
-
-#touch /opt/mesosphere/bin/wait_for_file.sh
-#chmod +x /opt/mesosphere/bin/wait_for_file.sh
-#cat <<EOF >>/opt/mesosphere/bin/wait_for_file.sh
-##! /bin/sh
-#until [ -f "$1" ]; do
-#  sleep 1
-#done
-#EOF
-
-
 
 svc_rm_dep dcos-mesos-dns.service		dcos-mesos-master.service
 svc_needs_zookeeper dcos-mesos-dns.service
@@ -123,7 +121,8 @@ svc_needs_zookeeper dcos-oauth.service
 svc_needs dcos-cluster-id.service		dcos-exhibitor.service
 svc_needs_zookeeper dcos-cluster-id.service
 
-svc_needs dcos-spartan.service			dcos-epmd.service                       
+svc_sed dcos-spartan.service			Pre=/ Pre=-/
+svc_needs dcos-spartan.service			dcos-epmd.service
 svc_needs dcos-spartan.service			dcos-exhibitor.service
 svc_starts dcos-spartan.service			dcos-gen-resolvconf.timer
 svc_starts dcos-spartan.service			dcos-spartan-watchdog.timer
@@ -153,32 +152,14 @@ svc_needs_marathon dcos-adminrouter.service
 svc_starts dcos-adminrouter.service		dcos-logrotate.timer
 svc_starts dcos-adminrouter.service		dcos-adminrouter-reload.timer
 
-#svc_needs dcos.target				dcos-adminrouter.service
+#add_to_unit dcos-adminrouter-reload.service   RemainAfterExit yes
+#add_to_unit dcos-cluster-id.service           RemainAfterExit yes
+#add_to_unit dcos-gen-resolvconf.service       RemainAfterExit yes
+#add_to_unit dcos-logrotate.service            RemainAfterExit yes
+#add_to_unit dcos-spartan-watchdog.service     RemainAfterExit yes
 
-echo Launching
+rm -rf /opt/mesosphere/active/minuteman
+rm -rf /opt/mesosphere/active/keepalived
+rm -rf /opt/mesosphere/active/dcos-signal
 
-#rm /usr/bin/systemd-tty-ask-password-agent
-#ln -s /bin/true /usr/bin/systemd-tty-ask-password-agent
-
-systemctl start dcos-marathon.service
-systemctl start dcos-adminrouter.service
-
-systemctl -a | grep dcos
-
-systemctl list-unit-files | grep dcos
-exit
-
-
-# keepalived is a monitor for VRRP
-#
-dcos-keepalived.service                enabled 
-
-# Minuteman is the distributed firewall
-#
-dcos-minuteman.service                 enabled 
-
-# dcos-signal seems to send data to mesophere.com
-#
-dcos-signal.service                    enabled 
-dcos-signal.timer                      enabled 
-
+systemctl enable dcos-01-startup.service
