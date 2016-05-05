@@ -3,9 +3,10 @@
 . /service_functions.bash
 
 svc dcos-spartan.service
-svc_sed	Pre=/ Pre=-/                          # Dont fail trying to load Spartan Interfaces
 svc_wants dcos-epmd.service                   # Make sure EPMD is running
 svc_starts dcos-spartan-watchdog.timer        # When Spartan starts enable the watchdog timer
+svc_sed	"Pre=-*/usr/bin/env ip" "Pre=-/usr/sbin/ip"
+svc_sed	"Pre=-*/usr/bin/env modprobe" "Pre=-/usr/sbin/modprobe"
 
 svc dcos-spartan-watchdog.service
 svc_needs_spartan                             # No point starting watchdog if Spartan isnt running
@@ -25,4 +26,4 @@ rm -rf /opt/mesosphere/active/minuteman
 rm -rf /opt/mesosphere/active/keepalived
 rm -rf /opt/mesosphere/active/dcos-signal
 
-systemctl enable dcos-01-startup.service
+#systemctl enable dcos-01-startup.service

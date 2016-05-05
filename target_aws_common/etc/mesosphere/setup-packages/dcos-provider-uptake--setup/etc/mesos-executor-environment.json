@@ -1,0 +1,6 @@
+{
+  "PATH": "/usr/bin:/bin",
+  "SHELL": "/usr/bin/bash",
+  "LD_LIBRARY_PATH": "/opt/mesosphere/lib",
+  "SASL_PATH": "/opt/mesosphere/lib/sasl2"
+}

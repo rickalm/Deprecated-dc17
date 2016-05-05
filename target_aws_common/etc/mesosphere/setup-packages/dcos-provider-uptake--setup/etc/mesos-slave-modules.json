@@ -1,0 +1,34 @@
+{
+  "libraries": [
+    {
+      "modules": [
+        {
+          "name": "org_apache_mesos_LogrotateContainerLogger",
+          "parameters": [
+            {
+              "value": "/opt/mesosphere/active/mesos/libexec/mesos/",
+              "key": "launcher_dir"
+            },
+            {
+              "value": "2MB",
+              "key": "max_stdout_size"
+            },
+            {
+              "value": "rotate 9",
+              "key": "logrotate_stdout_options"
+            },
+            {
+              "value": "2MB",
+              "key": "max_stderr_size"
+            },
+            {
+              "value": "rotate 9",
+              "key": "logrotate_stderr_options"
+            }
+          ]
+        }
+      ],
+      "file": "/opt/mesosphere/lib/liblogrotate_container_logger.so"
+    }
+  ]
+}

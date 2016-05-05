@@ -5,27 +5,30 @@ FROM uptake/dcos:1.7_base_slave
 # 3 Server: ba37b469d77bdf76021c74cfd78c50dd8d091b90
 #
 RUN \
-  PKGID=45a8974c28d1f2a890628bdcff057261195b1aa2; \
-  \
-  mkdir -p /opt/mesosphere/packages/dcos-config--setup_${PKGID}; \
-  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-config/dcos-config--setup_${PKGID}.tar.xz \
-  | tar -C /opt/mesosphere/packages/dcos-config--setup_${PKGID} -Jxf -; \
-  \
-  mkdir -p /opt/mesosphere/packages/dcos-metadata--setup_${PKGID}; \
-  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-metadata/dcos-metadata--setup_${PKGID}.tar.xz \
-  | tar -C /opt/mesosphere/packages/dcos-metadata--setup_${PKGID} -Jxf -; \
-  \
-  rm /opt/mesosphere/packages/dcos-config--setup_${PKGID}/etc/dns_search_config; \
-  \
-  echo '[' >/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo "  \"dcos-config--setup_${PKGID}\"," >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo "  \"dcos-metadata--setup_${PKGID}\"" >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo ']' >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  \
   touch /etc/mesosphere/roles/aws; \
+  touch /etc/mesosphere/roles/uptake; \
   touch /etc/mesosphere/roles/slave
 
+#  PKGID=45a8974c28d1f2a890628bdcff057261195b1aa2; \
+#  \
+#  mkdir -p /opt/mesosphere/packages/dcos-config--setup_${PKGID}; \
+#  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-config/dcos-config--setup_${PKGID}.tar.xz \
+#  | tar -C /opt/mesosphere/packages/dcos-config--setup_${PKGID} -Jxf -; \
+#  \
+#  mkdir -p /opt/mesosphere/packages/dcos-metadata--setup_${PKGID}; \
+#  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-metadata/dcos-metadata--setup_${PKGID}.tar.xz \
+#  | tar -C /opt/mesosphere/packages/dcos-metadata--setup_${PKGID} -Jxf -; \
+#  \
+#  rm /opt/mesosphere/packages/dcos-config--setup_${PKGID}/etc/dns_search_config; \
+#  \
+#  echo '[' >/etc/mesosphere/setup-flags/cluster-packages.json; \
+#  echo "  \"dcos-config--setup_${PKGID}\"," >>/etc/mesosphere/setup-flags/cluster-packages.json; \
+#  echo "  \"dcos-metadata--setup_${PKGID}\"" >>/etc/mesosphere/setup-flags/cluster-packages.json; \
+#  echo ']' >>/etc/mesosphere/setup-flags/cluster-packages.json; \
+#  \
+
 ADD target_common /
+ADD target_aws_common /
 ADD target_aws_slave /
 
 RUN /setup.sh

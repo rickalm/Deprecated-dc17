@@ -1,0 +1,6 @@
+{
+  "environment": {
+    "DCOS_VERSION": "1.7.0",
+    "DCOS_IMAGE_COMMIT": "19d355209269e8836c6b080e5e766f9ddb89aa8c"
+  }
+}

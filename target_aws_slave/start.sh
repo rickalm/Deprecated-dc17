@@ -2,8 +2,7 @@
 
 echo Launching Mesos Master
 
-dcos_config_dir=$(find /opt/mesosphere/packages -name dcos-config--setup*)
-aws_conf_dir=/etc/mesosphere/setup-packages/dcos-provider-aws--setup
+conf_dir=/etc/mesosphere/setup-packages/dcos-provider-uptake--setup
 
 # Absorb Environment from init (Yes its a hack, but this way we get any Docker Environment Vars)
 #
@@ -21,10 +20,10 @@ fi
 
 # Write the changes out to the config files
 #
-sed -i -e '/^EXHIBITOR_ADDRESS/d' ${aws_conf_dir}/etc/dns_config
-sed -i -e '/^MASTER_SOURCE/d' ${aws_conf_dir}/etc/dns_config
-echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${aws_conf_dir}/etc/dns_config
-echo MASTER_SOURCE=exhibitor >>${aws_conf_dir}/etc/dns_config
+sed -i -e '/^EXHIBITOR_ADDRESS/d' ${conf_dir}/etc/dns_config
+sed -i -e '/^MASTER_SOURCE/d' ${conf_dir}/etc/dns_config
+echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${conf_dir}/etc/dns_config
+echo MASTER_SOURCE=exhibitor >>${conf_dir}/etc/dns_config
 
 # Source the Mesosphere enviornment before launch
 #

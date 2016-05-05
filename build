@@ -12,7 +12,7 @@ docker build -f Dockerfile.dcos:1.7_aws_slave -t uptake/dcos:1.7_aws_slave .
 docker tag -f uptake/dcos:1.7_aws_master rickalm/dcos:1.7_aws_master
 docker tag -f uptake/dcos:1.7_aws_slave rickalm/dcos:1.7_aws_slave
 
-docker push rickalm/dcos:1.7_aws_master
-docker push rickalm/dcos:1.7_aws_slave
+[ -z "$1" ] && docker push rickalm/dcos:1.7_aws_master
+[ -z "$1" ] && docker push rickalm/dcos:1.7_aws_slave
 
 docker images | grep none | awk '{print $3}' | xargs docker rmi
