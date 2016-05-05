@@ -28,4 +28,4 @@ echo MASTER_SOURCE=exhibitor >>${conf_dir}/etc/dns_config
 # Source the Mesosphere enviornment before launch
 #
 set -a; . /opt/mesosphere/environment; set +a
-/opt/mesosphere/bin/pkgpanda setup
+/opt/mesosphere/bin/pkgpanda setup --no-systemd
