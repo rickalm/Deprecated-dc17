@@ -26,6 +26,12 @@ RUN \
   mkdir -p ${AWS_CONF_DIR}/etc; \
   echo '{}' >${AWS_CONF_DIR}/pkginfo.json; \
   \
+  echo RESOLVERS=169.254.169.253 >>${AWS_CONF_DIR}/etc/dns_config; \
+  echo MASTER_SOURCE=exhibitor >>${AWS_CONF_DIR}/etc/dns_config; \
+  echo EXHIBITOR_ADDRESS=localhost >>${AWS_CONF_DIR}/etc/dns_config; \
+  \
+  touch ${AWS_CONF_DIR}/etc/dns_search_config; \
+  \
   touch /etc/mesosphere/roles/aws; \
   touch /etc/mesosphere/roles/slave
 
