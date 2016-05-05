@@ -21,7 +21,10 @@ fi
 
 # Write the changes out to the config files
 #
-echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${aws_config_dir}/etc/dns_config
+sed -i -e '/^EXHIBITOR_ADDRESS/d' ${aws_conf_dir}/etc/dns_config
+sed -i -e '/^MASTER_SOURCE/d' ${aws_conf_dir}/etc/dns_config
+echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${aws_conf_dir}/etc/dns_config
+echo MASTER_SOURCE=exhibitor >>${aws_conf_dir}/etc/dns_config
 
 # Source the Mesosphere enviornment before launch
 #

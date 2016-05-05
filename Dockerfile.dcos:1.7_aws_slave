@@ -6,7 +6,6 @@ FROM uptake/dcos:1.7_base_slave
 #
 RUN \
   PKGID=45a8974c28d1f2a890628bdcff057261195b1aa2; \
-  AWS_CONF_DIR=/etc/mesosphere/setup-packages/dcos-provider-aws--setup; \
   \
   mkdir -p /opt/mesosphere/packages/dcos-config--setup_${PKGID}; \
   curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-config/dcos-config--setup_${PKGID}.tar.xz \
@@ -23,17 +22,10 @@ RUN \
   echo "  \"dcos-metadata--setup_${PKGID}\"" >>/etc/mesosphere/setup-flags/cluster-packages.json; \
   echo ']' >>/etc/mesosphere/setup-flags/cluster-packages.json; \
   \
-  mkdir -p ${AWS_CONF_DIR}/etc; \
-  echo '{}' >${AWS_CONF_DIR}/pkginfo.json; \
-  \
-  echo RESOLVERS=169.254.169.253 >>${AWS_CONF_DIR}/etc/dns_config; \
-  echo MASTER_SOURCE=exhibitor >>${AWS_CONF_DIR}/etc/dns_config; \
-  echo EXHIBITOR_ADDRESS=localhost >>${AWS_CONF_DIR}/etc/dns_config; \
-  \
-  touch ${AWS_CONF_DIR}/etc/dns_search_config; \
-  \
   touch /etc/mesosphere/roles/aws; \
   touch /etc/mesosphere/roles/slave
 
+ADD target_common /
 ADD target_aws_slave /
+
 RUN /setup.sh
