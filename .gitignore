@@ -1,0 +1,7 @@
+master-*
+slave-*
+build
+pull*
+push*
+old/
+join-D17
