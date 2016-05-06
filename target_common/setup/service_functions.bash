@@ -53,7 +53,7 @@ svc_needs_file() {
 }
 
 svc_must_ping() {
-  svc_add_prestart "ping -w 10 -c 1 $1 || /bin/false"
+  svc_add_prestart /bin/ping -w 10 -c 1 $1
 }
 
 svc_wants() {

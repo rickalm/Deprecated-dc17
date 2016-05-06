@@ -1,11 +1,10 @@
 #! /bin/sh
 
+. /setup/common/start.sh
+[ -f /setup/aws/start.sh ] && . /setup/aws/start.sh
+
 echo Launching Mesos Master
 dcos_config_dir=$(find /opt/mesosphere/packages -name dcos-config--setup*)
-
-# Absorb Environment from init (Yes its a hack, but this way we get any Docker Environment Vars)
-#
-set -a; eval $(cat /proc/1/environ | tr '\0' '\n'); set +a
 
 # Set a default cluster name if not specified
 #
@@ -16,12 +15,6 @@ MESOS_CLUSTER_SIZE=${MESOS_CLUSTER_SIZE:-1}
 #
 if [ "${MESOS_CLUSTER_SIZE}" -gt 1 ]; then
   [ -z "${AWS_S3_BUCKET}" ] && echo "AWS_S3_BUCKET not defined, aborting" && exit 1
-fi
-
-# If AWS_REGION isnt defined go discover it
-#
-if [ -z "${AWS_REGION}" ]; then
-  AWS_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//')
 fi
 
 # Write the changes out to the config files

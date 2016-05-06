@@ -3,16 +3,17 @@ docker ps | grep uptake.centos | awk '{print $1}' | xargs -n 1 docker rm
 
 docker build -f Dockerfile.centos:7-systemd -t uptake/centos:7-systemd .
 
-docker build -f Dockerfile.dcos:1.7_base_master -t uptake/dcos:1.7_base_master .
-docker build -f Dockerfile.dcos:1.7_aws_master -t uptake/dcos:1.7_aws_master .
+#docker build -f Dockerfile.dcos:1.7_base_master -t uptake/dcos:1.7_base_master .
+#docker build -f Dockerfile.dcos:1.7_base_slave -t uptake/dcos:1.7_base_slave .
+docker build -f Dockerfile.dcos:1.7_base -t uptake/dcos:1.7_base .
 
-docker build -f Dockerfile.dcos:1.7_base_slave -t uptake/dcos:1.7_base_slave .
+docker build -f Dockerfile.dcos:1.7_aws_master -t uptake/dcos:1.7_aws_master .
 docker build -f Dockerfile.dcos:1.7_aws_slave -t uptake/dcos:1.7_aws_slave .
 
 docker tag -f uptake/dcos:1.7_aws_master rickalm/dcos:1.7_aws_master
 docker tag -f uptake/dcos:1.7_aws_slave rickalm/dcos:1.7_aws_slave
 
-[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_master
+#[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_master
 [ -n "$1" ] && docker push rickalm/dcos:1.7_aws_slave
 
 docker images | grep none | awk '{print $3}' | xargs docker rmi

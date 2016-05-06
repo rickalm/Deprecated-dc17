@@ -1,4 +1,4 @@
-FROM uptake/dcos:1.7_base_master
+FROM uptake/dcos:1.7_base
 
 # Install AWS config packages
 # 1 Server: 45a8974c28d1f2a890628bdcff057261195b1aa2
@@ -38,5 +38,7 @@ RUN \
   touch /etc/mesosphere/roles/master; \
   touch /etc/mesosphere/roles/aws_master; 
 
+ADD target_common /
 ADD target_aws_master /
+
 RUN /setup.sh
