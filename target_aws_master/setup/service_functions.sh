@@ -1,5 +1,7 @@
 #! /bin/bash
 
+echo Using Target_AWS_Master service functions
+
 find_file() {
   find /opt/mesosphere/packages -name $1
 }
@@ -93,7 +95,7 @@ svc_needs_file() {
   svc_add_prestart $1	/usr/bin/test -f $2
 }
 
-dcos_config_dir=$(find /opt/mesosphere/packages -name dcos-config--setup*)
+dcos_config_dir=$(find /etc/mesosphere/setup-packages -name *docker--setup*)
 
 touch ${dcos_config_dir}/bin/wait_till_ping.sh
 chmod +x ${dcos_config_dir}/bin/wait_till_ping.sh
@@ -112,54 +114,3 @@ until /opt/mesosphere/bin/exhibitor_wait.py; do
   sleep 1
 done
 EOF
-
-svc_rm_dep dcos-mesos-dns.service		dcos-mesos-master.service
-svc_needs_zookeeper dcos-mesos-dns.service
-
-svc_needs_zookeeper dcos-oauth.service
-
-svc_needs dcos-cluster-id.service		dcos-exhibitor.service
-svc_needs_zookeeper dcos-cluster-id.service
-
-svc_sed dcos-spartan.service			Pre=/ Pre=-/
-svc_needs dcos-spartan.service			dcos-epmd.service
-svc_needs dcos-spartan.service			dcos-exhibitor.service
-svc_starts dcos-spartan.service			dcos-gen-resolvconf.timer
-svc_starts dcos-spartan.service			dcos-spartan-watchdog.timer
-svc_needs_zookeeper dcos-spartan.service
-
-svc_needs_spartan dcos-spartan-watchdog.service
-svc_rm_dep dcos-spartan-watchdog.service	sleep.60
-
-svc_needs_spartan dcos-mesos-master.service
-svc_needs_clusterid dcos-mesos-master.service
-svc_needs dcos-mesos-master.service		dcos-mesos-dns.service
-
-svc_needs_leader dcos-marathon.service
-
-svc_needs_leader dcos-ddt.service
-
-svc_needs_leader dcos-cosmos.service
-
-svc_needs dcos-adminrouter.service		dcos-oauth.service
-svc_needs dcos-adminrouter.service		dcos-cosmos.service
-svc_needs dcos-adminrouter.service		dcos-ddt.service
-svc_needs dcos-adminrouter.service		dcos-history-service.service
-svc_cond_pathexists dcos-adminrouter.service	/opt/mesosphere/etc/adminrouter.env
-svc_cond_pathexists dcos-adminrouter.service	/opt/mesosphere/etc/dcos-oauth.env
-svc_cond_pathexists dcos-adminrouter.service	/var/lib/dcos/auth-token-secret
-svc_needs_marathon dcos-adminrouter.service
-svc_starts dcos-adminrouter.service		dcos-logrotate.timer
-svc_starts dcos-adminrouter.service		dcos-adminrouter-reload.timer
-
-#add_to_unit dcos-adminrouter-reload.service   RemainAfterExit yes
-#add_to_unit dcos-cluster-id.service           RemainAfterExit yes
-#add_to_unit dcos-gen-resolvconf.service       RemainAfterExit yes
-#add_to_unit dcos-logrotate.service            RemainAfterExit yes
-#add_to_unit dcos-spartan-watchdog.service     RemainAfterExit yes
-
-rm -rf /opt/mesosphere/active/minuteman
-rm -rf /opt/mesosphere/active/keepalived
-rm -rf /opt/mesosphere/active/dcos-signal
-
-systemctl enable dcos-01-startup.service
