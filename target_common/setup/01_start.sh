@@ -6,13 +6,12 @@ dcos_dir=/opt/mesosphere
 
 # Absorb Environment from init (Yes its a hack, but this way we get any Docker Environment Vars)
 #
-set -a; eval $(cat /proc/1/environ | tr '\0' '\n'); set +a
+set -o allexport; eval $(cat /proc/1/environ | tr '\0' '\n'); set +o allexport
 
 # Locate docker.sock and link to /var/run/docker.sock
 #
-sock=$(mount | tr ' ' '\n' | grep docker.sock)"
+sock=$(mount | tr ' ' '\n' | grep docker.sock)
 [ -n "${sock}" -a "${sock}" != "/var/run/docker.sock" ] && ln -s ${sock} /var/run/docker.sock
-#! /bin/sh
 
 # Set a default cluster name if not specified
 #

@@ -1,50 +1,53 @@
+echo Using Common Service_Functions
+
 find_file() {
-  find /opt/mesosphere/packages -name $1
+  find -L /opt/mesosphere/active -name $1
 }
 
-get_pkg_id() {
-  basename $(find /opt/mesosphere/packages -maxdepth 1 -name $1*)
-}
+#get_pkg_id() {
+#  basename $(find /opt/mesosphere/packages -maxdepth 1 -name $1*)
+#}
 
 add_to_unit() {
   local key=$1
   local value=$2
 
-  grep -qi "^${key}" ${service_filename} || sed -i -e "/\\[Unit\\]/a${key}=" ${service_filename}
-  sed -i -e "/^${key}/I s~\$~ ${value}~" ${service_filename}
-  sed -i -e 's~= ~=~' ${service_filename}
+  grep -qi "^${key}" ${unit_filename} || sed -i -e "/\\[Unit\\]/a${key}=" ${unit_filename}
+  sed -i -e "/^${key}/I s~\$~ ${value}~" ${unit_filename}
+  sed -i -e 's~= ~=~' ${unit_filename}
 }
 
 append_to_unit() {
   local key=$1
   local value=$2
 
-  sed -i -e "/\\[Unit\\]/a${key}=${value}" ${service_filename}
+  sed -i -e "/\\[Unit\\]/a${key}=${value}" ${unit_filename}
 }
 
 svc(){
-  service_filename=$(find_file $1)
-  [ -z "${service_filename}" ] && echo Cant find $1 && exit 1
+  unit_filename=$(find_file $1)
+  [ -z "${unit_filename}" ] && echo Cant find $1 && ls -la /opt/mesosphere/active && exit 1
+  echo Updating $1
 }
 
 svc_sed() {
   local key=$1
   local value=$2
 
-  sed -i -e "s~${key}~${value}~" ${service_filename}
+  sed -i -e "s~${key}~${value}~" ${unit_filename}
 }
 
 svc_append() {
-  echo $1 >>${service_filename}
+  echo $1 >>${unit_filename}
 }
 
-svc_rm_dep() {
-  sed -i -e "/$1/d" ${service_filename}
+svc_rm_line() {
+  sed -i -e "/$1/d" ${unit_filename}
 }
 
 svc_add_prestart() {
   echo /\\[Service\\]/aExecStartPre=$@ >/tmp/$$.sed
-  sed -i -f /tmp/$$.sed ${service_filename}
+  sed -i -f /tmp/$$.sed ${unit_filename}
   rm /tmp/$$.sed
 }
 
@@ -53,7 +56,7 @@ svc_needs_file() {
 }
 
 svc_must_ping() {
-  svc_add_prestart /bin/ping -w 10 -c 1 $1
+  svc_add_prestart /bin/ping -w 30 -c 1 $1
 }
 
 svc_wants() {
@@ -76,10 +79,10 @@ svc_cond_pathexists() {
 }
 
 svc_remove_old_deps() {
-  svc_rm_dep exhibitor_wait
-  svc_rm_dep 'ping .* ready.spartan'
-  svc_rm_dep 'ping .* leader.mesos'
-  svc_rm_dep 'ping .* marathon.mesos'
+  svc_rm_line exhibitor_wait
+  svc_rm_line 'ping.+ready.spartan'
+  svc_rm_line 'ping.+leader.mesos'
+  svc_rm_line 'ping.+marathon.mesos'
 }
 
 svc_waitfor_zookeeper() {
@@ -123,7 +126,7 @@ svc_needs_marathon() {
 }
 
 svc_waitfor_clusterid() {
-  svc_rm_dep var.lib.dcos.cluster-id
+  svc_rm_line var.lib.dcos.cluster-id
   svc_cond_pathexists /var/lib/dcos/cluster-id
 }
 
@@ -132,22 +135,20 @@ svc_needs_clusterid() {
   svc_needs	dcos-cluster-id.service
 }
 
-dcos_config_dir=$(find /opt/mesosphere/packages -name dcos-config--setup*)
-
-touch ${dcos_config_dir}/bin/wait_till_ping.sh
-chmod +x ${dcos_config_dir}/bin/wait_till_ping.sh
-cat <<EOF >>${dcos_config_dir}/bin/wait_till_ping.sh
-#! /bin/sh
-until ping -c 1 \$1 || /bin/false; do
-  sleep 1
-done
-EOF
-
-touch ${dcos_config_dir}/bin/wait_for_zookeeper.sh
-chmod +x ${dcos_config_dir}/bin/wait_for_zookeeper.sh
-cat <<EOF >>${dcos_config_dir}/bin/wait_for_zookeeper.sh
-#! /bin/sh
-until /opt/mesosphere/bin/exhibitor_wait.py; do
-  sleep 1
-done
-EOF
+#touch ${dcos_dir}/bin/wait_till_ping.sh
+#chmod +x ${dcos_dir}/bin/wait_till_ping.sh
+#cat <<EOF >>${dcos_dir}/bin/wait_till_ping.sh
+##! /bin/sh
+#until ping -c 1 \$1 || /bin/false; do
+#  sleep 1
+#done
+#EOF
+#
+#touch ${dcos_dir}/bin/wait_for_zookeeper.sh
+#chmod +x ${dcos_dir}/bin/wait_for_zookeeper.sh
+#cat <<EOF >>${dcos_dir}/bin/wait_for_zookeeper.sh
+##! /bin/sh
+#until ${dcos_dir}/exhibitor_wait.py; do
+#  sleep 1
+#done
+#EOF

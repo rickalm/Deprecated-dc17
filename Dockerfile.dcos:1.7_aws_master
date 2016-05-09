@@ -1,9 +1,11 @@
-FROM uptake/dcos:1.7_base
+FROM rickalm/centos7-systemd
 
+VOLUME [ "/data" ]
+ENTRYPOINT [ "/start.sh" ]
+
+#COPY bootstrap.tar.xz /
 ADD target_common /
 ADD target_aws_common /
 ADD target_aws_master /
 
 RUN /setup.sh
-
-ENTRYPOINT [ "/start.sh" ]

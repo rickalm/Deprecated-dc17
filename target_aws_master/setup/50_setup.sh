@@ -1,42 +1,53 @@
-svc_rm_dep dcos-mesos-dns.service		dcos-mesos-master.service
-svc_needs_zookeeper dcos-mesos-dns.service
+touch /etc/mesosphere/roles/master
+touch /etc/mesosphere/roles/aws_master
+touch /etc/mesosphere/roles/aws
 
-svc_needs_zookeeper dcos-oauth.service
+svc dcos-mesos-dns.service
+svc_needs_zookeeper 
 
-svc_needs dcos-cluster-id.service		dcos-exhibitor.service
-svc_needs_zookeeper dcos-cluster-id.service
+svc dcos-oauth.service
+svc_needs_zookeeper
 
-svc_sed dcos-spartan.service			Pre=/ Pre=-/
-svc_needs dcos-spartan.service			dcos-epmd.service
-svc_needs dcos-spartan.service			dcos-exhibitor.service
-svc_starts dcos-spartan.service			dcos-gen-resolvconf.timer
-svc_starts dcos-spartan.service			dcos-spartan-watchdog.timer
-svc_needs_zookeeper dcos-spartan.service
+svc dcos-cluster-id.service
+svc_needs_zookeeper
 
-svc_needs_spartan dcos-spartan-watchdog.service
-svc_rm_dep dcos-spartan-watchdog.service	sleep.60
+svc dcos-spartan.service
+svc_sed Pre=/ Pre=-/
+svc_needs dcos-epmd.service
+svc_starts dcos-gen-resolvconf.timer
+svc_starts dcos-spartan-watchdog.timer
+svc_waitfor_zookeeper 
 
-svc_needs_spartan dcos-mesos-master.service
-svc_needs_clusterid dcos-mesos-master.service
-svc_needs dcos-mesos-master.service		dcos-mesos-dns.service
+svc dcos-spartan-watchdog.service
+svc_needs_spartan
+svc_rm_line 'sleep.*60'
 
-svc_needs_leader dcos-marathon.service
+svc dcos-mesos-master.service
+svc_needs_spartan
+svc_needs_clusterid
 
-svc_needs_leader dcos-ddt.service
+svc dcos-marathon.service
+svc_needs_leader
 
-svc_needs_leader dcos-cosmos.service
+svc dcos-ddt.service
+svc_needs_leader
 
-svc_needs dcos-adminrouter.service		dcos-oauth.service
-svc_needs dcos-adminrouter.service		dcos-cosmos.service
-svc_needs dcos-adminrouter.service		dcos-ddt.service
-svc_needs dcos-adminrouter.service		dcos-history-service.service
-svc_cond_pathexists dcos-adminrouter.service	/opt/mesosphere/etc/adminrouter.env
-svc_cond_pathexists dcos-adminrouter.service	/opt/mesosphere/etc/dcos-oauth.env
-svc_cond_pathexists dcos-adminrouter.service	/var/lib/dcos/auth-token-secret
-svc_needs_marathon dcos-adminrouter.service
-svc_starts dcos-adminrouter.service		dcos-logrotate.timer
-svc_starts dcos-adminrouter.service		dcos-adminrouter-reload.timer
+svc dcos-cosmos.service
+svc_needs_leader
 
-rm -rf /opt/mesosphere/active/minuteman
-rm -rf /opt/mesosphere/active/keepalived
-rm -rf /opt/mesosphere/active/dcos-signal
+svc dcos-adminrouter.service
+svc_needs_marathon 
+svc_needs dcos-oauth.service
+svc_needs dcos-cosmos.service
+svc_needs dcos-ddt.service
+svc_needs dcos-history-service.service
+svc_cond_pathexists /opt/mesosphere/etc/adminrouter.env
+svc_cond_pathexists /opt/mesosphere/etc/dcos-oauth.env
+svc_cond_pathexists /var/lib/dcos/auth-token-secret
+svc_starts dcos-logrotate.timer
+svc_starts dcos-adminrouter-reload.timer
+
+rm /opt/mesosphere/active/minuteman
+rm /opt/mesosphere/active/keepalived
+rm /opt/mesosphere/active/dcos-signal
+

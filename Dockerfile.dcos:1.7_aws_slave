@@ -1,4 +1,4 @@
-FROM uptake/dcos:1.7_base
+FROM uptake/centos:7-systemd
 
 ADD target_common /
 ADD target_aws_common /

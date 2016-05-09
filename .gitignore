@@ -1,7 +1,9 @@
+old/
 master-*
 slave-*
 build
 pull*
 push*
-old/
+kill*
 join-D17
+target_common/bootstrap.tar.xz

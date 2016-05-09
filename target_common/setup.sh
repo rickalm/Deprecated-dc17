@@ -6,13 +6,10 @@
 
 # Run each setup script in order
 #
-find /setup/ -name *_setup.sh | sort | while read line; do echo . $line >>/tmp/setup.loader; done
+rm /tmp/setup.loader 2>/dev/null; touch /tmp/setup.loader
+find /setup/ -name *_setup.sh | sort | while read line; do
+  echo echo Running $line >>/tmp/setup.loader
+  echo . $line >>/tmp/setup.loader
+done
 . /tmp/setup.loader
 rm /tmp/setup.loader
-
-# Finally run pkgpanda and cleanup after its done
-#
-set -a; . /opt/mesosphere/environment; set +a
-/opt/mesosphere/bin/pkgpanda setup --no-systemd
-
-find /opt/mesosphere -name '*.old' | xargs rm -rf
