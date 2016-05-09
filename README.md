@@ -1,13 +1,14 @@
-= DCOS as a Docker Container
+# DCOS as a Docker Container
 
 
-= Launching a DCOS Master
+# Launching a DCOS Master
 
-
+```
 docker run --privileged=true --name master --net=host -d -it \
   -v /var/lib/mesos:/data \
   -e 'MESOS_CLUSTER=CLUSTER_NAME' \
   rickalm/dcos:1.7_aws_master
+```
 
 Environment Variables that influence the startup
 
