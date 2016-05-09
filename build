@@ -2,6 +2,7 @@ docker ps | grep rickalm.dcos | awk '{print $1}' | xargs -n 1 docker rm
 docker ps | grep rickalm.centos | awk '{print $1}' | xargs -n 1 docker rm
 docker ps -a -q | xargs docker rm
 
+docker build -f Dockerfile.centos:7-systemd -t rickalm/centos7-systemd .
 docker build -f Dockerfile.dcos:1.7_base -t rickalm/dcos:1.7_base .
 
 docker build -f Dockerfile.dcos:1.7_aws_master -t rickalm/dcos:1.7_aws_master .
