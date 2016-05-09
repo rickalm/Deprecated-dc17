@@ -41,64 +41,64 @@ Environment Variables that influence the startup
 
 - Security Groups. The DCOS AWS Cloud Formation template creates 5 templates that are reasonable sound from a security stance.
 
--- LB-Security-Group - Is an empty group which is the SourceSecurityGroup for the ELB's to allow them to access the nodes in the cluster
---- Inbound: None
---- Outbound: All
+  - LB-Security-Group - Is an empty group which is the SourceSecurityGroup for the ELB's to allow them to access the nodes in the cluster
+    - Inbound: None
+    - Outbound: All
 
--- Master-Security-Group - Is applied to Master nodes to control communication to them
---- Inbound:
----- TCP/80 - From LB-Security-Group (DCOS Admin Router)
----- TCP/8080 - From LB-Security-Group (Marathon)
----- TCP/5050 - From LB-Security-Group (Mesos)
----- TCP/2181 - From LB-Security-Group (Zookeeper)
----- TCP/8181 - From LB-Security-Group (Exhbititor)
----- ALL/ALL - From Master-Security-Group
----- ALL/ALL - From Slave-Security-Group
+  - Master-Security-Group - Is applied to Master nodes to control communication to them
+    - Inbound:
+      - TCP/80 - From LB-Security-Group (DCOS Admin Router)
+      - TCP/8080 - From LB-Security-Group (Marathon)
+      - TCP/5050 - From LB-Security-Group (Mesos)
+      - TCP/2181 - From LB-Security-Group (Zookeeper)
+      - TCP/8181 - From LB-Security-Group (Exhbititor)
+      - ALL/ALL - From Master-Security-Group
+      - ALL/ALL - From Slave-Security-Group
 
--- Slave-Security-Group - Is applied to (NonPublic)Slave Nodes
---- Inbound:
----- ALL/ALL - From Master-Security-Group
----- ALL/ALL - From Slave-Security-Group
----- ALL/ALL - From PublicSlave-Security-Group
---- Outbound: All
+  - Slave-Security-Group - Is applied to (NonPublic)Slave Nodes
+    - Inbound:
+      - ALL/ALL - From Master-Security-Group
+      - ALL/ALL - From Slave-Security-Group
+      - ALL/ALL - From PublicSlave-Security-Group
+    - Outbound: All
 
--- PublicSlave-Security-Group - Is applied to PublicSlave Nodes which have an External IP Address
---- Inbound:
----- ALL/ALL - From Master-Security-Group
----- ALL/ALL - From Slave-Security-Group
----- ALL/ALL - From PublicSlave-Security-Group
----- Add other rules as appropriate for your application
---- Outbound: All
+  - PublicSlave-Security-Group - Is applied to PublicSlave Nodes which have an External IP Address
+    - Inbound:
+      - ALL/ALL - From Master-Security-Group
+      - ALL/ALL - From Slave-Security-Group
+      - ALL/ALL - From PublicSlave-Security-Group
+      - Add other rules as appropriate for your application
+    - Outbound: All
 
--- Admin-Security-Group - Is applied to all nodes in your cluster to allow SysAdmin access to the cluster (e.g. ssh)
---- Inbound:
----- ALL/ALL - Define as needed from your Admin Team's IP addresses
---- Outbound: All
+  - Admin-Security-Group - Is applied to all nodes in your cluster to allow SysAdmin access to the cluster (e.g. ssh)
+    - Inbound:
+      - ALL/ALL - Define as needed from your Admin Team's IP addresses
+    - Outbound: All
 
 - DCOS Cluster Load Balancer. In order for the slaves to access the resources on the Cluster Masters, its recomended to create a LB which the slaves will use to access the cluster. This is not really intended as the way for users to access the cluster, but more as the way for the cluster resources to discover each other
--- Ports to forward
---- 2181 - Zookeeper's RPC/API interface
---- 8181 - Exhibitor's Web UI/API interface
---- 5050 - Mesos's Web/API Interface
---- 8080 - Marathon's Web/API Interface
---- 80 - DCOS's HTTP Web/API Interface
---- 443 - DCOS's HTTPS Web/API Interface
--- Health Check
---- Endpoint - HTTP:5050/health (is mesos healthy)
--- Security
---- LB-Security-Group
---- Master-Security-Group
---- Slave-Security-Group
---- PublicSlave-Security-Group
---- Admin-Security-Group
+  - Ports to forward
+    - 2181 - Zookeeper's RPC/API interface
+    - 8181 - Exhibitor's Web UI/API interface
+    - 5050 - Mesos's Web/API Interface
+    - 8080 - Marathon's Web/API Interface
+    - 80 - DCOS's HTTP Web/API Interface
+    - 443 - DCOS's HTTPS Web/API Interface
+  - Health Check
+    - Endpoint - HTTP:5050/health (is mesos healthy)
+  - Security
+    - LB-Security-Group
+    - Master-Security-Group
+    - Slave-Security-Group
+    - PublicSlave-Security-Group
+    - Admin-Security-Group
 
 - DCOS Admin Load Balancer. Used to access the DCOS interface from outside the cluster using the DCOS Cli or the Web Interface 
--- Ports to forward
---- 80 - DCOS's HTTP Web/API Interface
---- 443 - DCOS's HTTPS Web/API Interface
--- Health Check
---- Endpoint - HTTP:5050/health (is mesos healthy)
--- Security
---- LB-Security-Group
---- Admin-Security-Group
+  - Ports to forward
+    - 80 - DCOS's HTTP Web/API Interface
+    - 443 - DCOS's HTTPS Web/API Interface
+  - Health Check
+    - Endpoint - HTTP:5050/health (is mesos healthy)
+  - Security
+    - LB-Security-Group
+    - Admin-Security-Group
 
