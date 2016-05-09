@@ -5,7 +5,7 @@ echo Launching Mesos Slave
 [ -f /setup/common/start.sh ] && . /setup/common/start.sh
 [ -f /setup/aws/start.sh ] && . /setup/aws/start.sh
 
-conf_dir=/etc/mesosphere/setup-packages/dcos-provider-uptake--setup
+conf_dir=/etc/mesosphere/setup-packages/dcos-provider-docker--setup
 
 # Check for required Params
 #

@@ -1,4 +1,4 @@
-FROM uptake/centos:7-systemd
+FROM rickalm/centos:7-systemd
 
 ADD target_common /
 ADD target_aws_common /
