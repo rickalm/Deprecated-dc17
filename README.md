@@ -39,41 +39,44 @@ Environment Variables that influence the startup
 
 ### Other details for setting up a cluster
 
-- Security Groups. The DCOS AWS Cloud Formation template creates 5 templates that are reasonable sound from a security stance.
+#### Security Groups.
+The DCOS AWS Cloud Formation template creates 5 templates that are reasonable sound from a security stance.
 
-  - LB-Security-Group - Is an empty group which is the SourceSecurityGroup for the ELB's to allow them to access the nodes in the cluster
-    - Inbound: None
-    - Outbound: All
+- LB-Security-Group - Is an empty group which is the SourceSecurityGroup for the ELB's to allow them to access the nodes in the cluster
+  - Inbound: None
+  - Outbound: All
 
-  - Master-Security-Group - Is applied to Master nodes to control communication to them
-    - Inbound:
-      - TCP/80 - From LB-Security-Group (DCOS Admin Router)
-      - TCP/8080 - From LB-Security-Group (Marathon)
-      - TCP/5050 - From LB-Security-Group (Mesos)
-      - TCP/2181 - From LB-Security-Group (Zookeeper)
-      - TCP/8181 - From LB-Security-Group (Exhbititor)
-      - ALL/ALL - From Master-Security-Group
-      - ALL/ALL - From Slave-Security-Group
+- Master-Security-Group - Is applied to Master nodes to control communication to them
+  - Inbound:
+    - TCP/80 - From LB-Security-Group (DCOS Admin Router)
+    - TCP/8080 - From LB-Security-Group (Marathon)
+    - TCP/5050 - From LB-Security-Group (Mesos)
+    - TCP/2181 - From LB-Security-Group (Zookeeper)
+    - TCP/8181 - From LB-Security-Group (Exhbititor)
+    - ALL/ALL - From Master-Security-Group
+    - ALL/ALL - From Slave-Security-Group
 
-  - Slave-Security-Group - Is applied to (NonPublic)Slave Nodes
-    - Inbound:
-      - ALL/ALL - From Master-Security-Group
-      - ALL/ALL - From Slave-Security-Group
-      - ALL/ALL - From PublicSlave-Security-Group
-    - Outbound: All
+- Slave-Security-Group - Is applied to (NonPublic)Slave Nodes
+  - Inbound:
+    - ALL/ALL - From Master-Security-Group
+    - ALL/ALL - From Slave-Security-Group
+    - ALL/ALL - From PublicSlave-Security-Group
+  - Outbound: All
 
-  - PublicSlave-Security-Group - Is applied to PublicSlave Nodes which have an External IP Address
-    - Inbound:
-      - ALL/ALL - From Master-Security-Group
-      - ALL/ALL - From Slave-Security-Group
-      - ALL/ALL - From PublicSlave-Security-Group
-      - Add other rules as appropriate for your application
-    - Outbound: All
+- PublicSlave-Security-Group - Is applied to PublicSlave Nodes which have an External IP Address
+  - Inbound:
+    - ALL/ALL - From Master-Security-Group
+    - ALL/ALL - From Slave-Security-Group
+    - ALL/ALL - From PublicSlave-Security-Group
+    - Add other rules as appropriate for your application
+  - Outbound: All
 
-  - Admin-Security-Group - Is applied to all nodes in your cluster to allow SysAdmin access to the cluster (e.g. ssh)
-    - Inbound:
-      - ALL/ALL - Define as needed from your Admin Team's IP addresses
-    - Outbound: All
+- Admin-Security-Group - Is applied to all nodes in your cluster to allow SysAdmin access to the cluster (e.g. ssh)
+  - Inbound:
+    - ALL/ALL - Define as needed from your Admin Team's IP addresses
+  - Outbound: All
+
+#### Load Balancers (ELB)
 
 - DCOS Cluster Load Balancer. In order for the slaves to access the resources on the Cluster Masters, its recomended to create a LB which the slaves will use to access the cluster. This is not really intended as the way for users to access the cluster, but more as the way for the cluster resources to discover each other
   - Ports to forward
