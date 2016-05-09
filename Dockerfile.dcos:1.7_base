@@ -1,0 +1,11 @@
+FROM uptake/centos:7-systemd
+
+# Define DCOS download params
+#
+#
+ENV BOOTSTRAP_URL=https://downloads.mesosphere.com/dcos/EarlyAccess
+ENV BOOTSTRAP_ID=a31ed4c418a9d0d55d5304171e1ac2fce4ddc797
+
+# Centos 7 is missing the nogroup group, so create it
+#
+RUN groupadd nogroup

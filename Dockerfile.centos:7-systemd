@@ -2,10 +2,15 @@
 #
 #
 FROM centos:7
+
+VOLUME [ "/data" ]
+
 RUN \
-  yum update -y; \
-  yum install -y less iproute; \
-  yum clean all
+  yum update -y \
+  && yum install -y \
+    less \
+    iproute \
+  && yum clean all
 
 # Delete most systemd services
 #
@@ -25,8 +30,7 @@ RUN \
   mkdir -p /etc/selinux/targeted/contexts/; \
   echo '<busconfig><selinux></selinux></busconfig>' > /etc/selinux/targeted/contexts/dbus_contexts
 
-CMD [ "/usr/sbin/init" ]
-
+ENTRYPOINT [ "/usr/sbin/init" ]
 #
 #
 # End of Centos7 Configs

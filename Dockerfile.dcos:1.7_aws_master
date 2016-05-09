@@ -1,42 +1,11 @@
-FROM uptake/dcos:1.7_base_master
+FROM rickalm/centos7-systemd
 
-# Install AWS config packages
-# 1 Server: 45a8974c28d1f2a890628bdcff057261195b1aa2
-# 3 Server: ba37b469d77bdf76021c74cfd78c50dd8d091b90
-#
-RUN \
-  PKGID=45a8974c28d1f2a890628bdcff057261195b1aa2; \
-  AWS_CONF_DIR=/etc/mesosphere/setup-packages/dcos-provider-aws--setup; \
-  \
-  mkdir -p /opt/mesosphere/packages/dcos-config--setup_${PKGID}; \
-  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-config/dcos-config--setup_${PKGID}.tar.xz \
-  | tar -C /opt/mesosphere/packages/dcos-config--setup_${PKGID} -Jxf -; \
-  \
-  mkdir -p /opt/mesosphere/packages/dcos-metadata--setup_${PKGID}; \
-  curl -sSLo - ${BOOTSTRAP_URL}/packages/dcos-metadata/dcos-metadata--setup_${PKGID}.tar.xz \
-  | tar -C /opt/mesosphere/packages/dcos-metadata--setup_${PKGID} -Jxf -; \
-  \
-  rm /opt/mesosphere/packages/dcos-config--setup_${PKGID}/etc/dns_search_config; \
-  \
-  echo '[' >/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo "  \"dcos-config--setup_${PKGID}\"," >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo "  \"dcos-metadata--setup_${PKGID}\"" >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  echo ']' >>/etc/mesosphere/setup-flags/cluster-packages.json; \
-  \
-  mkdir -p ${AWS_CONF_DIR}/etc; \
-  echo '{}' >${AWS_CONF_DIR}/pkginfo.json; \
-  \
-  echo RESOLVERS=169.254.169.253 >>${AWS_CONF_DIR}/etc/dns_config; \
-  echo MASTER_SOURCE=exhibitor >>${AWS_CONF_DIR}/etc/dns_config; \
-  echo EXHIBITOR_ADDRESS=localhost >>${AWS_CONF_DIR}/etc/dns_config; \
-  \
-  touch ${AWS_CONF_DIR}/etc/dns_search_config; \
-  \
-  echo ADMINROUTER_ACTIVATE_AUTH_MODULE=false >${AWS_CONF_DIR}/etc/adminrouter.env; \
-  \
-  touch /etc/mesosphere/roles/aws; \
-  touch /etc/mesosphere/roles/master; \
-  touch /etc/mesosphere/roles/aws_master; 
+VOLUME [ "/data" ]
+ENTRYPOINT [ "/start.sh" ]
 
+#COPY bootstrap.tar.xz /
+ADD target_common /
+ADD target_aws_common /
 ADD target_aws_master /
+
 RUN /setup.sh
