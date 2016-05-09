@@ -1,5 +1,19 @@
 ## DCOS as a Docker Container
 
+### Why Docker container vs Native Install
+
+- Simpler to deploy. The DCOS method of deployment is fractured at the moment as follows:
+  - an AWS CloudFormation template that allows "auto-scalling" of resources, deploying the bootstrap loader along with a cloudinit script that customizes about a dozen files in a very hard to read/maintain manner
+  - a script that is intended to run from a "bootstrap node" that needs SSH access to all of the already deployed nodes, IP addresses of those hosts and other bits of information. This basically precludes the use of any auto-scale methodoligy
+
+- Upgrade/Downgrade:
+  - While the DCOS PkgPanda tool was designed for on-the-fly changes to the environment, it doesn't make it easy to replace files from the base build with customer packages.
+  - Knowing whats in your package. This is always important for Change Management it provides a way to create a fixed deplyment to your nodes
+
+- Do as I say, not as I do. How do you convince your developers to create docker containers for their application, yet tell them all of the tools your providing rely on native install
+
+- Creating support for environments where you can't control the Base Image. DCOS requires CentOS 7 or CoreOS 835 or greater but sometimes you have to deploy on older platforms. Rather than create a "Cant be used here" situation, this container is built from the CentOS 7 base image and then corrects for what features are not availible in the Host build (e.g. SystemD/CGroups)
+
 
 ### Launching a DCOS Master
 
@@ -9,6 +23,10 @@ docker run --privileged=true --net=host -it -d --name master \
   -e 'MESOS_CLUSTER=CLUSTER_NAME' \
   rickalm/dcos:1.7_aws_master
 ```
+
+Volume Mounts
+
+Inside the docker container the /data directory is defined as a volume mount to reduce the amount of data written to the overlayfs filesystem. By specifying a directory on the host, we are able to maintain persistance on the node so if the master needs to be restarted it can use cached information allowing its recovery to be faster.
 
 Environment Variables that influence the startup
 
@@ -28,9 +46,16 @@ Environment Variables that influence the startup
 
 ```
 docker run --privileged=true --net=host -it -d --name slave \
+  -v /var/run/docker.sock:/tmp/docker.sock \
+  -v /bin/docker:/bin/docker \
+  -v /var/lib/mesos:/data \
   -e 'EXHIBITOR_ADDRESS=127.0.0.1' \
   rickalm/dcos:1.7_aws_slave
 ```
+
+The first two volume mounts are there to provide the mesos-slave access to the host's docker environment so it can launch docker containers on the machine
+
+The third volume is identical to the one in the DCOS Master, allowing for persistance on the host so that the slave can resume its responsibilities with the shortest downtime
 
 Environment Variables that influence the startup
 
