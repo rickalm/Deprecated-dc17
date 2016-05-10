@@ -1,0 +1,4 @@
+FROM rickalm/dcos:1.7_base
+
+ADD target_aws_common/setup/bootstrap_aws.sh /
+RUN bash /bootstrap_aws.sh && rm /bootstrap_aws.sh
