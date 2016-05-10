@@ -1,4 +1,4 @@
-FROM rickalm/dcos:1.7_aws_base
+FROM rickalm/dcos:1.7_aws_base2
 
 ADD target_common /
 ADD target_aws_common /

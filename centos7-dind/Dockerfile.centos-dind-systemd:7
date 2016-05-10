@@ -1,0 +1,38 @@
+FROM centos:centos7
+MAINTAINER Rick Alm "rickalm@aol.com"
+ENV container docker
+
+VOLUME ["/run"]
+VOLUME ["/sys/fs/cgroup"]
+VOLUME ["/var/lib/docker"]
+
+ENTRYPOINT  ["/entrypoint.sh"]
+
+RUN \
+  yum -y update || exit 1; \
+  yum -y swap -- remove systemd-container systemd-container-libs -- install systemd systemd-libs dbus || exit 1; \
+  yum -y install \
+    lxc \
+    iptables \
+    || exit 1; \
+  \
+  systemctl mask \
+    dev-mqueue.mount \
+    dev-hugepages.mount \
+    systemd-remount-fs.service \
+    sys-kernel-config.mount \
+    sys-kernel-debug.mount \
+    sys-fs-fuse-connections.mount \
+    display-manager.service \
+    graphical.target \
+    systemd-logind.service \
+    console-getty.service \
+    getty@tty1.service \
+    || exit 1; \
+  \
+  curl -sSL https://get.docker.com/ | sh; \
+  \
+  yum -y clean all || exit 1; \
+  /bin/true
+
+ADD ./target /
