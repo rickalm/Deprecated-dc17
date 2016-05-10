@@ -5,14 +5,14 @@
 
 # Run each start script in order
 #
-rm /tmp/start.loader 2>/dev/null; touch /tmp/start.loader
+rm /start.loader 2>/dev/null; touch /start.loader
 find /setup/ -name *_start.sh | sort | while read line; do
-  echo echo Running. $line >>/tmp/start.loader
-  echo . $line >>/tmp/start.loader
+  echo echo Running. $line >>/start.loader
+  echo . $line >>/start.loader
 done
 
-. /tmp/start.loader
-rm /tmp/start.loader
+. /start.loader
+rm /start.loader
 
 # Pass control to SystemD
 #

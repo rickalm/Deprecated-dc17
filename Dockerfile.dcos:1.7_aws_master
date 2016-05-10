@@ -1,9 +1,5 @@
-FROM rickalm/centos7-systemd
+FROM rickalm/dcos:1.7_aws_base
 
-VOLUME [ "/data" ]
-ENTRYPOINT [ "/start.sh" ]
-
-#COPY bootstrap.tar.xz /
 ADD target_common /
 ADD target_aws_common /
 ADD target_aws_master /

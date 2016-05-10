@@ -25,7 +25,8 @@ fi
 
 # Mount /tmp to a ramdisk to reduce overlayfs writes
 #
-mount -t tmpfs -o size=256M tmpfs /tmp
+#mount -t tmpfs -o size=256M tmpfs /tmp
+systemctl enable tmp.mount
 
 # Enable DCOS services
 #

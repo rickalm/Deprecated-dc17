@@ -8,10 +8,11 @@ dcos_dir=/opt/mesosphere
 #
 set -o allexport; eval $(cat /proc/1/environ | tr '\0' '\n'); set +o allexport
 
-# Locate docker.sock and link to /var/run/docker.sock
+# Locate docker.sock and link to /var/run/docker.sock and /run/docker.sock incase systemd links /var/run to /run
 #
 sock=$(mount | tr ' ' '\n' | grep docker.sock)
 [ -n "${sock}" -a "${sock}" != "/var/run/docker.sock" ] && ln -s ${sock} /var/run/docker.sock
+[ -n "${sock}" -a "${sock}" != "/run/docker.sock" ] && ln -s ${sock} /run/docker.sock
 
 # Set a default cluster name if not specified
 #

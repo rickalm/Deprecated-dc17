@@ -8,13 +8,17 @@
 
 # Write the changes out to the config files
 #
-sed -i -e '/^EXHIBITOR_ADDRESS/d' ${conf_dir}/etc/dns_config
-sed -i -e '/^MASTER_SOURCE/d' ${conf_dir}/etc/dns_config
-echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${conf_dir}/etc/dns_config
-echo MASTER_SOURCE=exhibitor >>${conf_dir}/etc/dns_config
+sed -i -e '/^EXHIBITOR_ADDRESS/d' ${dcos_dir}/etc/dns_config
+sed -i -e '/^MASTER_SOURCE/d' ${dcos_dir}/etc/dns_config
+echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${dcos_dir}/etc/dns_config
+echo MASTER_SOURCE=exhibitor >>${dcos_dir}/etc/dns_config
 
 # Turn off SystemD/CGroup support in slave till we figure out work-around
 #
-sed -i -e '/^MESOS_ISOLATION/d' ${conf_dir}/etc/mesos-slave-common
-echo MESOS_ISOLATION=posix/cpu,posix/mem,posix/disk >${conf_dir}/etc/mesos-slave-common
-echo MESOS_SYSTEMD_ENABLE_SUPPORT=false >${conf_dir}/etc/mesos-slave-common
+sed -i -e '/^MESOS_ISOLATION/d' ${dcos_dir}/etc/mesos-slave-common
+echo MESOS_ISOLATION=posix/cpu,posix/mem,posix/disk >>${dcos_dir}/etc/mesos-slave-common
+echo MESOS_SYSTEMD_ENABLE_SUPPORT=false >>${dcos_dir}/etc/mesos-slave-common
+
+#systemctl disable dcos-vol-discovery-priv-agent.service
+systemctl disable dcos-signal.timer
+systemctl disable dcos-minuteman.service

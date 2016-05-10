@@ -1,4 +1,4 @@
-FROM rickalm/centos:7-systemd
+FROM rickalm/dcos:1.7_aws_base
 
 ADD target_common /
 ADD target_aws_common /
