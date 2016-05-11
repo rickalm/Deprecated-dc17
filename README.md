@@ -19,7 +19,7 @@
 
 ```
 docker run --privileged=true --net=host -it -d --name master \
-  -v /var/lib/mesos:/data \
+  -v /var/lib/mesos-master:/data \
   -e 'MESOS_CLUSTER=CLUSTER_NAME' \
   rickalm/dcos:1.7_aws_master
 ```
@@ -31,8 +31,13 @@ Inside the docker container the /data directory is defined as a volume mount to 
 Environment Variables that influence the startup
 
 - MESOS_CLUSTER - Name you want your cluster to be known as. Will default to a random name (Based on /dev/urandom)
+  - written to several places as required by the mesos scripts
 
 - MESOS_CLUSTER_SIZE - You can set this to the number of nodes you want in your cluster. If you change this value please be sure to use 3 5 or 7 as the target size. Mesos uses a quorum to maintain HA health and even numbers do not work. Also if you set this value you must provide a way for Exhibitor (Zookeeper) to find its peers. Currently that is limited to using an S3 bucket in this build
+
+  - Sets the Exhibitor Fixed Ensemble Size variable
+  - Computes the value for MESOS_QUORUM as MESOS_CLUSTER_SIZE - 1 (Imperfect, but can always be overridden as a VAR)
+  - Enforces S3 bucket configuration for clusters > 1 node 
 
 - AWS_S3_BUCKET - This is the name of the S3 bucket to store the Exhibitor files in for multi-node setup. The host needs access to this bucket and the easiest way is to create an IAM role and attach it to the hosts running the DCOS Masters.
 
@@ -41,14 +46,11 @@ Environment Variables that influence the startup
 - AWS_REGION - (Default is discovered via EC2-MetaData service) This is used in the S3 bucket API calls to direct the request to the correct region. If your S3 bucket is not in the same region as your cluster then you will need to set the value
 
 
-
 ### Launching a DCOS Slave
 
 ```
 docker run --privileged=true --net=host -it -d --name slave \
-  -v /var/run/docker.sock:/tmp/docker.sock \
-  -v /bin/docker:/bin/docker \
-  -v /var/lib/mesos:/data \
+  -v /var/lib/mesos-slave:/data \
   -e 'EXHIBITOR_ADDRESS=127.0.0.1' \
   rickalm/dcos:1.7_aws_slave
 ```
@@ -61,10 +63,26 @@ Environment Variables that influence the startup
 
 - EXHIBITOR_ADDRESS - A list of the Mesos Exhibitor nodes that the slave can use to contact the Mesos Cluster. The easiest (for many reasons) is to create a load balancer (e.g. AWS ELB) that forwards traffic to the availible nodes and provide the address of the ELB here.
 
+  - Note: If EXHIBITOR_ADDRESS is set to 127.0.0.1 it will configure the slave container to disable epmd, spartan, resolvconf, ddt and a few other services which overlap with the mesos-master container so they can co-exist on the same host. 
+
+
+### Environment Variables for both Master and Slave containers
+
+Any environment variable passed to the container prefixed with the list below will be written to /opt/mesosphere/etc/dcos-docker-environment. This file is included as the last EnvironmentFile= in each dcos-*.service unit file allowing any environment var to be overridden from the "docker run" command without having to track down the files where it is currently set and then perform an on-the-fly re-write of that file. 
+
+- MARATHON
+- MESOS
+- DCOS
+- EXHIBITOR
+- OAUTH
+- MASTER
+- RESOLVER
+- AWS
 
 ### Other details for setting up a cluster
 
-#### Security Groups.
+#### Security Groups
+.
 The DCOS AWS Cloud Formation template creates 5 templates that are reasonable sound from a security stance.
 
 - LB-Security-Group - Is an empty group which is the SourceSecurityGroup for the ELB's to allow them to access the nodes in the cluster
@@ -78,6 +96,7 @@ The DCOS AWS Cloud Formation template creates 5 templates that are reasonable so
     - TCP/5050 - From LB-Security-Group (Mesos)
     - TCP/2181 - From LB-Security-Group (Zookeeper)
     - TCP/8181 - From LB-Security-Group (Exhbititor)
+
     - ALL/ALL - From Master-Security-Group
     - ALL/ALL - From Slave-Security-Group
 
