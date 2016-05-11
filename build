@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 # vim: set ft=sh:
 
+[ "$1" == "dev" ] && dev=_dev && shift
+
 docker ps | grep rickalm.dcos | awk '{print $1}' | xargs -n 1 docker rm
 docker ps | grep rickalm.centos | awk '{print $1}' | xargs -n 1 docker rm
 docker ps -a -q | xargs docker rm
 
-#docker build -f Dockerfile.centos:7-systemd -t rickalm/centos7-systemd .
+#docker build -f Dockerfile.centos:7-systemd -t rickalm/centos7-systemd . || exit 1
 
 #pushd centos7-dind
 #bash build.sh
 #popd
 
-#docker build -f Dockerfile.dcos:1.7_base -t rickalm/dcos:1.7_base .
-#docker build -f Dockerfile.dcos:1.7_aws_base -t rickalm/dcos:1.7_aws_base .
+#docker build -f Dockerfile.dcos:1.7_base -t rickalm/dcos:1.7_base . || exit 1
+#docker build -f Dockerfile.dcos:1.7_aws_base -t rickalm/dcos:1.7_aws_base . || exit 1
 
-docker build -f Dockerfile.dcos:1.7_base_dind -t rickalm/dcos:1.7_base_dind .
-docker build -f Dockerfile.dcos:1.7_aws_base_dind -t rickalm/dcos:1.7_aws_base_dind .
+docker build -f Dockerfile.dcos:1.7_base_dind -t rickalm/dcos:1.7_base_dind . || exit 1
+docker build -f Dockerfile.dcos:1.7_aws_base_dind -t rickalm/dcos:1.7_aws_base_dind . || exit 1
 
-docker build -f Dockerfile.dcos:1.7_aws_master -t rickalm/dcos:1.7_aws_master .
-docker build -f Dockerfile.dcos:1.7_aws_slave -t rickalm/dcos:1.7_aws_slave .
+docker build -f Dockerfile.dcos:1.7_aws_master -t rickalm/dcos:1.7_aws_master${dev} . || exit 1
+docker build -f Dockerfile.dcos:1.7_aws_slave -t rickalm/dcos:1.7_aws_slave${dev} . || exit 1
 
-[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_master
-[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_slave
+[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_master || exit 1
+[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_slave || exit 1
 
 docker images | grep none | awk '{print $3}' | xargs docker rmi

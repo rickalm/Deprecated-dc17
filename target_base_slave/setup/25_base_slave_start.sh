@@ -3,6 +3,12 @@
 [ -z "${EXHIBITOR_ADDRESS}" ] && echo "EXHIBITOR_ADDRESS not defined, aborting" && exit 1
 
 
+# Get a better cluster name if we can
+#
+name=$(curl -sSL http://${EXHIBITOR_ADDRESS}/mesos/state | jq .cluster)
+MESOS_CLUSTER=${name:-${MESOS_CLUSTER}}
+
+
 # Update dns_config to use the master exhibitor
 #
 echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${dcos_conf}
