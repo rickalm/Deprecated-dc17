@@ -1,5 +1,0 @@
-docker rm -f dind-test
-docker run --privileged -it -d --net=host --name=dind-test \
-  -e "DOCKER_DAEMON_ARGS=-s overlay" \
-  rickalm/centos:7-dind-systemd
-docker exec -it dind-test /bin/bash

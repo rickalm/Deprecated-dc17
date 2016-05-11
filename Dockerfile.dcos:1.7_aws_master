@@ -1,6 +1,7 @@
-FROM rickalm/dcos:1.7_aws_base
+FROM rickalm/dcos:1.7_aws_base_dind
 
-ADD target_common /
+ADD target_base_common /
+ADD target_base_master /
 ADD target_aws_common /
 ADD target_aws_master /
 

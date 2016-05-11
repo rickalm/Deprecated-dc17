@@ -1,4 +1,4 @@
-FROM rickalm/centos:7-systemd
+FROM rickalm/centos7-dind-systemd:7
 
 ENTRYPOINT [ "/start.sh" ]
 
