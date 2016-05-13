@@ -68,7 +68,7 @@ Environment Variables that influence the startup
 
 ### Environment Variables for both Master and Slave containers
 
-Any environment variable passed to the container prefixed with the list below will be written to /opt/mesosphere/etc/dcos-docker-environment. This file is included as the last EnvironmentFile= in each dcos-*.service unit file allowing any environment var to be overridden from the "docker run" command without having to track down the files where it is currently set and then perform an on-the-fly re-write of that file. 
+Any environment variable passed to the container prefixed with the list below will be written to /opt/mesosphere/etc/dcos-docker.env . This file is included as the last EnvironmentFile= in each dcos-*.service unit file allowing any environment var to be overridden from the "docker run" command without having to track down the files where it is currently set and then perform an on-the-fly re-write of that file. 
 
 - MARATHON
 - MESOS

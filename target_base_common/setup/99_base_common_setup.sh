@@ -2,9 +2,9 @@
 #
 find /opt/mesosphere/packages -type f -name dcos-*.service | uniq | while read file; do
   if grep -i '\[Install\]' ${file}; then
-    sed -i -e '/[Install]/i EnvironmentFile=-/opt/mesosphere/etc/dcos-docker-environment' ${file}
+    sed -i -e '/[Install]/i EnvironmentFile=-${dcos_conf}' ${file}
   else
-    echo EnvironmentFile=-/opt/mesosphere/etc/dcos-docker-environment >>${file}
+    echo EnvironmentFile=-${dcos_conf} >>${file}
   fi 
 done
 
@@ -12,4 +12,3 @@ done
 #
 set -o allexport; . /opt/mesosphere/environment; set +o allexport
 /opt/mesosphere/bin/pkgpanda setup --no-systemd || exit 1
-

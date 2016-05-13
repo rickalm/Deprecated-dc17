@@ -14,22 +14,35 @@
 
 FROM centos:centos7
 MAINTAINER Rick Alm "rickalm@aol.com"
-ENV container docker
 
-VOLUME ["/run"]
-VOLUME ["/sys/fs/cgroup"]
-VOLUME ["/var/lib/docker"]
-
+# Install all of the external components as a single step to reduce layer size
+#
 RUN \
   yum -y update \
     || exit 1; \
-  yum -y swap -- remove systemd-container systemd-container-libs -- install systemd systemd-libs dbus \
+  \
+  # Swap out the "Containerized" SystemD for standard SystemD if its installed; \
+  \
+  yum -y swap \
+    -- remove systemd-container systemd-container-libs \
+    -- install systemd systemd-libs \
     || exit 1; \
+  \
+  # Install other tools we will need; \
+  \
   yum -y install \
     lxc \
+    dbus \
     less \
     iptables \
     || exit 1; \
+  \
+  # Cleanup YUM files to reduce image size; \
+  \
+  yum -y clean all \
+    || exit 1; \
+  \
+  # Deactivate units that will not work in a container; \
   \
   systemctl mask \
     dev-mqueue.mount \
@@ -45,20 +58,19 @@ RUN \
     graphical.target \
     || exit 1; \
   \
-  systemctl mask \
+  systemctl enable \
     tmp.mount \
     || exit 1; \
   \
-  curl -sSL https://get.docker.com/ | sh; \
+  # Install docker so we have a "DinD" environment; \
   \
-  yum -y clean all \
+  curl -sSL https://get.docker.com/ | sh \
     || exit 1; \
   \
   /bin/true
 
-ENTRYPOINT  ["/start_dind.sh"]
-CMD  ["/usr/lib/systemd/systemd"]
-
-# Split apart to improve docker build cache
-#
-ADD files /
+# declare /run and /sys/fs as volumes so they are not tied to overlayfs and therfore "remountable"
+# declare /var/lib/docker as a volume so overlayfs doesnt get swamped with deltas
+# 
+VOLUME [ "/run", "/sys/fs/cgroup", "/var/lib/docker" ]
+ENV container docker

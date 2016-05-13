@@ -1,12 +1,9 @@
 FROM rickalm/centos7-dind-systemd:7
 
-ENTRYPOINT [ "/start.sh" ]
-
+# Bootstrap DCOS into image
+#
 ADD target_base_common/setup/bootstrap_dcos.sh /
 RUN \
-  \
-  # Bootstrap dcos into image; \
-  \
   bash /bootstrap_dcos.sh \
     || exit 1; \
   rm /bootstrap_dcos.sh \
@@ -16,28 +13,21 @@ RUN \
 
 # Done as seperate step to improve docker build cache
 #
-VOLUME [ "/var/lib/rexray" ]
+# Bootstrap Rexray and friends into image
+#
+ADD target_base_common/setup/bootstrap_rexray.sh /
 RUN \
-  \
-  # Install JQ tools; \
-  \
-  curl -sSLo /usr/bin/jq  https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+  bash /bootstrap_rexray.sh \
     || exit 1; \
-  test -f /usr/bin/jq \
-    || exit 1; \
-  chmod +x /usr/bin/jq \
-    || exit 1; \
-  \
-  # Install ext filesystem tools; \
-  \
-  yum -y install e2fsprogs.x86_64 \
-    || exit 1; \
-  yum -y clean all \
-    || exit 1; \
-  \
-  # Install Rexray; \
-  \
-  curl -sSL https://dl.bintray.com/emccode/rexray/install | sh - \
+  rm /bootstrap_rexray.sh \
     || exit 1; \
   \
   /bin/true
+
+# Set the DCOS Entrypount (Installed in later steps)
+#
+ENTRYPOINT [ "/start.sh" ]
+
+# Declare volume mounts for DCOS and Rexray
+#
+VOLUME [ "/data", "/var/lib/rexray" ]

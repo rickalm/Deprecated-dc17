@@ -8,13 +8,12 @@ docker ps | grep rickalm.centos | awk '{print $1}' | xargs -n 1 docker rm
 docker ps -a -q | xargs docker rm
 
 #docker build -f Dockerfile.centos:7-systemd -t rickalm/centos7-systemd . || exit 1
-
-#pushd centos7-dind
-#bash build.sh
-#popd
-
 #docker build -f Dockerfile.dcos:1.7_base -t rickalm/dcos:1.7_base . || exit 1
 #docker build -f Dockerfile.dcos:1.7_aws_base -t rickalm/dcos:1.7_aws_base . || exit 1
+
+pushd centos7-dind-systemd
+bash build.sh
+popd
 
 docker build -f Dockerfile.dcos:1.7_base_dind -t rickalm/dcos:1.7_base_dind . || exit 1
 docker build -f Dockerfile.dcos:1.7_aws_base_dind -t rickalm/dcos:1.7_aws_base_dind . || exit 1

@@ -5,14 +5,13 @@
 
 # Get a better cluster name if we can
 #
-name=$(curl -sSL http://${EXHIBITOR_ADDRESS}/mesos/state | jq .cluster)
-MESOS_CLUSTER=${name:-${MESOS_CLUSTER}}
+name=$(curl -sSL http://${EXHIBITOR_ADDRESS}/mesos/state | jq .cluster | tr -d '"')
+[ ${name} ] && MESOS_CLUSTER=${name}
 
 
 # Update dns_config to use the master exhibitor
 #
-echo EXHIBITOR_ADDRESS=${EXHIBITOR_ADDRESS} >>${dcos_conf}
-echo MASTER_SOURCE=exhibitor >>${dcos_conf}
+MASTER_SOURCE=exhibitor >>${dcos_conf}
 
 
 # Turn off CGroup support in slave till we figure out work-around (Fixed with centos-dind-systemd image)
