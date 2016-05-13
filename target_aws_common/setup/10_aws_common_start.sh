@@ -49,7 +49,7 @@ systemctl enable rexray
 for i in $(seq 0 15); do
   devname=/dev/xvd$(printf "\x$(printf %x $[$i+97])")
   mknod -m 660 ${devname} b 202 $[$i*16]
-  mkown root:disk ${devname}
+  chown root:disk ${devname}
 done
 
 

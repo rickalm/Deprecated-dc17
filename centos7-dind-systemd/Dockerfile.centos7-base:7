@@ -35,6 +35,7 @@ RUN \
     dbus \
     less \
     iptables \
+    unzup \
     || exit 1; \
   \
   # Cleanup YUM files to reduce image size; \
