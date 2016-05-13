@@ -10,6 +10,7 @@ RUN \
   && yum install -y \
     less \
     iproute \
+    unzip \
   && yum clean all
 
 # Delete most systemd services
