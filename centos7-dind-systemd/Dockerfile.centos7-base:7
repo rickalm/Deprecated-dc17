@@ -35,6 +35,7 @@ RUN \
     dbus \
     less \
     iptables \
+    ipset \
     unzip \
     || exit 1; \
   \
@@ -72,6 +73,6 @@ RUN \
 
 # declare /run and /sys/fs as volumes so they are not tied to overlayfs and therfore "remountable"
 # declare /var/lib/docker as a volume so overlayfs doesnt get swamped with deltas
-# 
+#
 VOLUME [ "/run", "/sys/fs/cgroup", "/var/lib/docker" ]
 ENV container docker

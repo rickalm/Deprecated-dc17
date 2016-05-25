@@ -26,9 +26,8 @@ echo DCOS_DATACENTER=${DCOS_DATACENTER:-DataCenter01} >>${dcos_conf}
 echo DCOS_REGION=${DCOS_REGION:-Region01} >>${dcos_conf}
 
 
-# Disable minuteman and signal till we figure out how to make them work
+# Disable signal till we figure out how to make it work
 #
-systemctl disable dcos-minuteman.service
 systemctl disable dcos-signal.service
 
 
