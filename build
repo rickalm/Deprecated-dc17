@@ -1,27 +1,45 @@
 #!/usr/bin/env bash
 # vim: set ft=sh:
 
-[ "$1" == "dev" ] && dev=_dev && shift
+# If we were passed a build tag, use it
+# tags anything other than the word "push"
+# remove it from the stack so that push can also occur
+#
+# $0 005      - Build with tag '005'
+# $0 push     - Build untagged and push
+# $0 dev push - Build tag 'dev' and then push
+#
+[ "$1" != "push" ] && tag=_$1 && shift
 
-docker ps | grep rickalm.dcos | awk '{print $1}' | xargs -n 1 docker rm
-docker ps | grep rickalm.centos | awk '{print $1}' | xargs -n 1 docker rm
-docker ps -a -q | xargs docker rm
+# Stop any processes running that look like they are ours, unless we are told not to 'nokill'
+#
+if [ "$1" == "nokill" ]; then
+  shift
+else
+  docker ps | grep rickalm.dcos | awk '{print $1}' | xargs -n 1 docker rm
+  docker ps | grep rickalm.centos | awk '{print $1}' | xargs -n 1 docker rm
+  docker ps -a -q | xargs docker rm
+fi
 
-#docker build -f Dockerfile.centos:7-systemd -t rickalm/centos7-systemd . || exit 1
-#docker build -f Dockerfile.dcos:1.7_base -t rickalm/dcos:1.7_base . || exit 1
-#docker build -f Dockerfile.dcos:1.7_aws_base -t rickalm/dcos:1.7_aws_base . || exit 1
+# Build the Centos containers, in a subdirectory because its tied to another git repo
+#
+pushd centos7-dind-systemd; bash build.sh; popd
 
-pushd centos7-dind-systemd
-bash build.sh
-popd
-
+# Build our base containers
+#
 docker build -f Dockerfile.dcos:1.7_base_dind -t rickalm/dcos:1.7_base_dind . || exit 1
 docker build -f Dockerfile.dcos:1.7_aws_base_dind -t rickalm/dcos:1.7_aws_base_dind . || exit 1
 
-docker build -f Dockerfile.dcos:1.7_aws_master -t rickalm/dcos:1.7_aws_master${dev} . || exit 1
-docker build -f Dockerfile.dcos:1.7_aws_slave -t rickalm/dcos:1.7_aws_slave${dev} . || exit 1
+# Build the Master/Slave containers based on base
+#
+docker build -f Dockerfile.dcos:1.7_aws_master -t rickalm/dcos:1.7_aws_master${tag} . || exit 1
+docker build -f Dockerfile.dcos:1.7_aws_slave -t rickalm/dcos:1.7_aws_slave${tag} . || exit 1
 
-[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_master || exit 1
-[ -n "$1" ] && docker push rickalm/dcos:1.7_aws_slave || exit 1
+# If we are pushing, then do so
+#
+[ "$1" == "push ] && docker push rickalm/dcos:1.7_aws_master${tag} || exit 1
+[ "$1" == "push ] && docker push rickalm/dcos:1.7_aws_slave${tag} || exit 1
 
+# Clean up our left over images (e.g. tagged <none>) to free disk space
+#
 docker images | grep none | awk '{print $3}' | xargs docker rmi

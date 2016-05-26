@@ -13,14 +13,23 @@ RUN \
 
 # Done as seperate step to improve docker build cache
 #
-# Bootstrap Rexray and friends into image
+# Bootstrap Rexray and telegraf into image
 #
-ADD target_base_common/setup/bootstrap_rexray.sh /
+ADD target_base_common/setup/bootstrap_*.sh /
 RUN \
   bash /bootstrap_rexray.sh \
     || exit 1; \
   rm /bootstrap_rexray.sh \
     || exit 1; \
+  \
+  /bin/true
+
+RUN \
+  bash /bootstrap_telegraf.sh \
+    && /bin/true; \
+    #|| exit 1; \
+  #rm /bootstrap_telegraf.sh \
+    #|| exit 1; \
   \
   /bin/true
 

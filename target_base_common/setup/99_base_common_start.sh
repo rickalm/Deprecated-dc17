@@ -20,15 +20,15 @@ mkdir -p /data/var/lib/cosmos 2>/dev/null
 [ -n "${SEARCH}" ] && echo SEARCH=${SEARCH} >>${dcos_conf}
 
 
-# Write the DCOS_Datacenter and DCOS_Region params to our config file incase any previous setup scrap improved it
+# Set DCOS_Datacenter and DCOS_Region incase they are still blank, then save all DCOS_ params to our config file
 #
-echo DCOS_DATACENTER=${DCOS_DATACENTER:-DataCenter01} >>${dcos_conf}
-echo DCOS_REGION=${DCOS_REGION:-Region01} >>${dcos_conf}
+DCOS_DATACENTER=${DCOS_DATACENTER:-DataCenter01}
+DCOS_REGION=${DCOS_REGION:-Region01}
+cat /proc/self/environ | tr '\0' '\n' | grep '^DCOS_' >>${dcos_conf}
 
 
-# Disable minuteman and signal till we figure out how to make them work
+# Disable signal till we figure out how to make it work and if we want it to exist
 #
-systemctl disable dcos-minuteman.service
 systemctl disable dcos-signal.service
 
 
